@@ -3,15 +3,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from icecream import ic
 
 # Parameters
 LEARNING_RATE = 0.3
 EPOCHS = 50
-BIAS = -1
+
 
 # 3D input data (x1, x2, x3)
 X = np.array(
-    [[-0.5, -0.5, 0.2], [-0.5, 0.5, -0.3], [0.3, -0.5, 0.8], [-0.1, 1.0, -0.5]]
+    [[-1, -0.5, -0.5, 0.2], [-1, -0.5, 0.5, -0.3], [-1, 0.3, -0.5, 0.8], [-1, -0.1, 1.0, -0.5]]
 )
 y = np.array([1, 1, -1, -1])
 
@@ -31,7 +32,7 @@ for epoch in range(EPOCHS):
         iteration += 1
 
         # Net input (linear combination of inputs and weights)
-        net_input = np.dot(inputs, weights) - BIAS
+        net_input = np.dot(inputs, weights)
 
         # Prediction using sign activation function
         prediction = np.sign(net_input)
@@ -53,6 +54,9 @@ for epoch in range(EPOCHS):
         print(f"Perceptron converged at epoch {epoch}")
         break
 
+ic(weights_per_epoch)
+ic(weights)
+
 # Plot 3D Decision Planes over Epochs
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111, projection="3d")
@@ -67,32 +71,32 @@ for i, epoch_weights in enumerate(weights_per_epoch):
 
     if i < len(weights_per_epoch) - 1:
         if not np.isclose(
-            epoch_weights[2], 0
+            epoch_weights[-1], 0
         ):  # Avoid division by zero in x3 calculation
             x3_mesh = (
-                BIAS - epoch_weights[0] * x1_mesh - epoch_weights[1] * x2_mesh
-            ) / epoch_weights[2]
+                epoch_weights[0] - epoch_weights[1] * x1_mesh - epoch_weights[2] * x2_mesh
+            ) / epoch_weights[-1]
             ax.plot_surface(x1_mesh, x2_mesh, x3_mesh, alpha=0.1)
 
-if not np.isclose(weights[2], 0):
-    x3_mesh = (BIAS - weights[0] * x1_mesh - weights[1] * x2_mesh) / weights[2]
+if not np.isclose(weights[-1], 0):
+    x3_mesh = (weights[0] - weights[1] * x1_mesh - weights[2] * x2_mesh) / weights[-1]
     ax.plot_surface(x1_mesh, x2_mesh, x3_mesh, alpha=0.8, label="Final Decision Plane")
 
 
 # Plot data points
 ax.scatter(
-    X[y == 1][:, 0],
     X[y == 1][:, 1],
     X[y == 1][:, 2],
+    X[y == 1][:, 3],
     c="yellow",
     marker="^",
     s=200,
     # label="Class 1",
 )
 ax.scatter(
-    X[y == -1][:, 0],
     X[y == -1][:, 1],
     X[y == -1][:, 2],
+    X[y == -1][:, 3],
     c="red",
     marker="o",
     s=200,
